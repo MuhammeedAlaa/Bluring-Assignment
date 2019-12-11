@@ -8,18 +8,17 @@ layout(location=2) in vec2 texcoord;
 
 out vec4 v_color;
 out vec2 v_texcoord;
-out vec3 v_Prev;
+out vec4 motion_vector;
 
-uniform mat4 M;
-uniform mat4 Prev_M;
+uniform mat4 M_Curr;
+uniform mat4 M_Prev;
 uniform mat4 VP;
 
 void main(){
-    vec4 world = M * vec4(position, 1.0f);
-    vec4 pre = Prev_M * vec4(position, 1.0f);     
+    vec4 world = M_Curr * vec4(position, 1.0f);
     gl_Position = VP * world; 
     v_color = color;
     v_texcoord = texcoord;
-    v_Prev = world.xyz - pre.xyz;
-
+    vec4 prev_world = M_Prev * vec4(position, 1.0f);
+    motion_vector = world - prev_world;
 }

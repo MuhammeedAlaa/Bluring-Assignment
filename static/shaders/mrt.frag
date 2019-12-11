@@ -5,18 +5,14 @@ precision highp float;
 
 in vec4 v_color;
 in vec2 v_texcoord;
-in vec3 v_Prev;
-in vec3 VP;
-    
-
+in vec4 motion_vector;
 layout(location=0) out vec4 color;
 layout(location=1) out vec4 motion; // Send the motion vectors here
 
 uniform vec4 tint;
 uniform sampler2D texture_sampler;
 
-
 void main(){
     color = texture(texture_sampler, v_texcoord) * v_color * tint; // Send our interpolated color
-    motion = vec4(v_Prev,0.0f);
+    motion = motion_vector;
 }

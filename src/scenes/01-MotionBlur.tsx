@@ -9,7 +9,6 @@ import { vec3, mat4, quat } from 'gl-matrix';
 import { CheckBox } from '../common/dom-utils';
 import { createElement } from 'tsx-create-element';
 
-
 // This function creates a triangle wave, this is used to move the house model
 function triangle(x: number): number {
     let i = Math.floor(x);
@@ -221,15 +220,14 @@ export default class MotionBlurScene extends Scene {
             for(let key in this.objects){
                 let obj = this.objects[key];
                 //TODO: Add any uniforms you need here
-                program.setUniformMatrix4fv("M", false, obj.currentModelMatrix); // Send the model matrix of the object in the current frame
+                program.setUniformMatrix4fv("M_Curr", false, obj.currentModelMatrix); // Send the model matrix of the object in the current frame
+                program.setUniformMatrix4fv("M_Prev", false, obj.previousModelMatrix); // Send the model matrix of the object in the current frame
                 program.setUniform4f("tint", obj.tint); // Send the color tint
-                program.setUniformMatrix4fv("Prev_M",false,obj.previousModelMatrix);
                 this.gl.activeTexture(this.gl.TEXTURE0); // Bind the texture and sampler to unit 0
                 this.gl.bindTexture(this.gl.TEXTURE_2D, obj.texture);
                 program.setUniform1i('texture_sampler', 0);
                 this.gl.bindSampler(0, this.samplers['regular']);
                 obj.mesh.draw(this.gl.TRIANGLES); // Draw the object mesh
-                
             }
         }
 
@@ -244,20 +242,28 @@ export default class MotionBlurScene extends Scene {
                 let program = this.programs['motion-blur'];
                 program.use();
                 //TODO: Add any uniforms you need
-                    
-                program.setUniformMatrix4fv("VP", false, this.camera.ViewProjectionMatrix); // Send the View Projection matrix
+                program.setUniformMatrix4fv("VP", false, mat4.invert(mat4.create(),this.camera.ViewProjectionMatrix)); // Send the View Projection matrix    
                 program.setUniformMatrix4fv("VP_Prev", false, this.VP_prev); // Send the View Projection matrix
-                
+
+
                 this.gl.activeTexture(this.gl.TEXTURE0);
                 this.gl.bindTexture(this.gl.TEXTURE_2D, this.textures['color-target']);
                 program.setUniform1i('color_sampler', 0);
                 this.gl.bindSampler(0, this.samplers['postprocess']);
+                
                 this.gl.activeTexture(this.gl.TEXTURE1);
                 this.gl.bindTexture(this.gl.TEXTURE_2D, this.textures['depth-target']);
                 program.setUniform1i('depth_sampler', 1);
-                
                 this.gl.bindSampler(1, this.samplers['postprocess']);
+                
+                this.gl.activeTexture(this.gl.TEXTURE2);
+                this.gl.bindTexture(this.gl.TEXTURE_2D, this.textures['motion-target']);
+                program.setUniform1i('motion_sampler', 2);
+                this.gl.bindSampler(2, this.samplers['postprocess']);
                 this.gl.drawArrays(this.gl.TRIANGLES, 0, 3);
+                
+                
+            
             } else { // If motion blur is disabled, we just blit the color target to full screen
                 let program = this.programs['blit'];
                 program.use();
