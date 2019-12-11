@@ -1,7 +1,7 @@
 {
-  "name": "gfx-lab-3",
+  "name": "gfx-blur",
   "version": "1.0.0",
-  "description": "Lab 3 for CMP[N]205 (CUFE CCE-C) using WebGL",
+  "description": "assignment bluring using WebGL",
   "main": "index.html",
   "scripts": {
     "watch": "parcel index.html",
